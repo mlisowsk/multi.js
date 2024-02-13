@@ -67,6 +67,25 @@
     box-sizing: border-box;
 }
 
+.wrapper-low {
+	/* border: 1px solid red; */
+	display: flex;
+	flex-direction: row;
+	margin: 5px;
+}
+
+.wrapper-low .controls {
+	/* border: 1px solid blue; */
+	display: flex;
+	flex-direction: row;
+	justify-content: space-evenly;
+	width: 50%;
+}
+
+.wrapper-low .controls button {
+	flex: 0 1 auto;
+}
+
 .multi-wrapper .non-selected-wrapper .item.selected {
     opacity: 0.5;
 }
@@ -80,5 +99,11 @@
 .multi-wrapper .non-selected-wrapper .item.disabled:hover,
 .multi-wrapper .selected-wrapper .item.disabled:hover {
     background: inherit;
+    cursor: inherit;
+}
+
+.multi-wrapper .non-selected-wrapper .item:selected,
+.multi-wrapper .selected-wrapper .item:selected {
+    background: blue;
     cursor: inherit;
 }

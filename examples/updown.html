@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>multi.js Up Down Buttons Example</title>
+
+        <!-- Include multi.js -->
+        <link rel="stylesheet" type="text/css" href="../dist/multi.min.css" />
+        <script src="../dist/multi.min.js"></script>
+
+        <style>
+            /* Basic styling */
+            body {
+                font-family: sans-serif;
+            }
+
+            .container {
+                box-sizing: border-box;
+                margin: 0 auto;
+                max-width: 500px;
+                padding: 0 20px;
+                width: 100%;
+            }
+						
+						
+.multi-wrapper .item.hilight {
+    background: lightblue;
+    border-radius: 2px;
+}
+
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>multi.js</h1>
+
+            <form>
+                <select
+                    multiple="multiple"
+                    name="favorite_fruits"
+                    id="fruit_select"
+                >
+                    <option selected="selected" disabled="disabled" value="1">One</option>
+                    <option selected value="2">Two</option>
+                    <option value="3">Three</option>
+                    <option value="4">Four</option>
+                    <option value="5">Five</option>
+                    <option value="6">Six</option>
+                    <option value="7">Seven</option>
+                    <option value="8">Eight</option>
+                    <option value="9">Nine</option>
+                    <option value="10">Ten</option>
+                    <option value="11">Eleven</option>
+                    <option value="12">Twelve</option>
+                </select>
+            </form>
+        </div>
+
+        <script>
+            var select = document.getElementById("fruit_select");
+            multi(select, {
+                non_selected_header: "Fruits",
+                selected_header: "Favorite fruits",
+								selected_updown: true,
+								button_up_label: "Up",
+								button_down_label: "Down",
+								selected_order: [2,1,"a"]
+            });
+        </script>
+    </body>
+</html>

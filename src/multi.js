@@ -74,6 +74,26 @@ var multi = (function() {
     trigger_event("change", select);
   };
 
+  // Toggles hilight state of an option
+  var toggle_option_hilight = function(select, event, settings) {
+    var option = select.options[event.target.getAttribute("multi-index")];
+		//console.log("toggle_option_hilight");
+    if (option.disabled) {
+      return;
+    }
+
+		var hi = (option.getAttribute('data-multi-hilight') === "true");
+		//console.log("toggle-option-highlight: bef="+hi+ " "+typeof hi+" aft="+(!hi));
+		option.setAttribute('data-multi-hilight', ""+!hi);
+
+		//var $options = self.$right.find(':selected:not(span):not(.hidden)');
+    //option.selected = !option.selected;
+
+    //check_limit(select, settings);
+
+    trigger_event("change", select);
+  };
+
   // Refreshes an already constructed multi.js instance
   var refresh_select = function(select, settings) {
     // Clear columns
@@ -103,7 +123,16 @@ var multi = (function() {
     // Current group
     var item_group = null;
     var current_optgroup = null;
-
+console.log("data-selected-order="+select.getAttribute("data-selected-order"));
+		var selected_order;
+		try {
+			var selected_order = JSON.parse(select.getAttribute("data-selected-order"));
+		} catch(e) {
+			var selected_order = [];
+		}
+	
+		var selected_elems = [];
+		
     // Loop over select options and add to the non-selected and selected columns
     for (var i = 0; i < select.options.length; i++) {
       var option = select.options[i];
@@ -123,13 +152,22 @@ var multi = (function() {
         row.className += " disabled";
       }
 
+			var hi = (option.getAttribute('data-multi-hilight') === "true");
+			//console.log(hi);
       // Add row to selected column if option selected
       if (option.selected) {
         row.className += " selected";
         var clone = row.cloneNode(true);
-        select.wrapper.selected.appendChild(clone);
+				if (hi)
+					clone.className += " hilight";
+				selected_elems.push(clone);
+        //select.wrapper.selected.appendChild(clone);
       }
 
+			if (hi) {
+				row.className += " hilight";
+			}
+			
       // Create group if entering a new optgroup
       if (
         option.parentNode.nodeName == "OPTGROUP" &&
@@ -168,6 +206,30 @@ var multi = (function() {
         }
       }
     }
+		
+		// populate selected list:
+		var val, idx, elem;
+		console.log("selected_elems.length="+selected_elems.length+" " +JSON.stringify(selected_elems));
+		// first, traverse order array and find matching selected HTMLOptionElements
+		for(var s=0; s<selected_order.length; s++) {
+			val = selected_order[s];
+			console.log("looking for val="+val+ " "+typeof val);
+			idx = selected_elems.find_option_by_value(val);
+			if (idx >= 0) {
+				console.log("find_option_by_value found! for val="+val+" idx="+idx);
+				select.wrapper.selected.appendChild(selected_elems[idx]);
+				selected_elems.splice(idx, 1);
+			}
+		}
+		// next, append remaining HTMLOptionElements
+		console.log("remaining selected_elems.length="+selected_elems.length+" " +JSON.stringify(selected_elems));
+		for(var s=0; s<selected_elems.length; s++) {
+			select.wrapper.selected.appendChild(selected_elems[s]);
+			selected_order.push(selected_elems[s].getAttribute("data-value"));
+		}
+		console.log("final selected_order="+selected_order);
+		select.setAttribute("data-selected-order", JSON.stringify(selected_order));
+		
 
     // Hide empty optgroups
     if (settings.hide_empty_groups) {
@@ -181,7 +243,15 @@ var multi = (function() {
     }
   };
 
+	// Array of HTMLElements returns the array index of element with given data-value of v or null.
+  Array.prototype.find_option_by_value = function( v ) {
+		return this.findIndex(function(el,i){
+			console.log("checking i="+i+" el.value="+el.getAttribute("data-value") +" vs "+v+" for "+JSON.stringify(el));
+			return (el.getAttribute("data-value") == v);});
+	}
+	
   // Intializes and constructs an multi.js instance
+	// @param {HTMLSelectElement} select - DOM element of <SELECT>
   var init = function(select, settings) {
     /**
      * Set up settings (optional parameter) and its default values
@@ -219,6 +289,10 @@ var multi = (function() {
       typeof settings["hide_empty_groups"] !== "undefined"
         ? settings["hide_empty_groups"]
         : false;
+		settings["selected_order"] =
+		  Array.isArray(settings["selected_order"])
+		    ? settings["selected_order"]
+				: [];
 
     // Check if already initalized
     if (select.dataset.multijs != null) {
@@ -233,6 +307,7 @@ var multi = (function() {
     // Hide select
     select.style.display = "none";
     select.setAttribute("data-multijs", true);
+		select.setAttribute("data-selected-order", JSON.stringify(settings["selected_order"]));
 
     // Start constructing selector
     var wrapper = document.createElement("div");
@@ -261,10 +336,26 @@ var multi = (function() {
     var selected = document.createElement("div");
     selected.className = "selected-wrapper";
 
-    // Add click handler to toggle the selected status
+		var preventClick = false;
+		var dblclickTimer = null;
+    // Add dblclick handler to toggle the selected status
+    wrapper.addEventListener("dblclick", function(event) {
+      if (event.target.getAttribute("multi-index")) {
+				clearTimeout(dblclickTimer);
+				preventClick = true;
+        toggle_option(select, event, settings);
+      }
+    });
+
+    // Add click handler to toggle the hilight status
     wrapper.addEventListener("click", function(event) {
       if (event.target.getAttribute("multi-index")) {
-        toggle_option(select, event, settings);
+				dblclickTimer = setTimeout(() => {
+						if(!preventClick){
+							toggle_option_hilight(select, event, settings);
+						}
+						preventClick = false
+					}, 250);
       }
     });
 
@@ -290,6 +381,35 @@ var multi = (function() {
 
     // Add multi.js wrapper after select element
     select.parentNode.insertBefore(wrapper, select.nextSibling);
+
+		// Add Up Down buttons
+		if (settings.selected_updown) {
+			console.log ("adding updown buttons");
+			var wrapper_below = document.createElement("div");	// wrapper below both lists, for layout
+			var wrapper_left = document.createElement("div");	// empty box below left list, for layout
+			var wrapper_buttons = document.createElement("div");	// wrapper for controls below right list
+			var selected_up_btn = document.createElement("button");
+			var selected_down_btn = document.createElement("button");
+
+			wrapper_below.className = "wrapper-low";
+			wrapper_buttons.className = "controls";
+			wrapper_left.className = "controls";
+			selected_up_btn.className = "btn btn-up";
+			selected_down_btn.className = "btn btn-down";
+			selected_up_btn.setAttribute("type", "button");
+			selected_down_btn.setAttribute("type", "button");
+			selected_up_btn.innerHTML = (settings.button_up_label ? settings.button_up_label : "\u2191"); // Unicode UPWARDS arrow
+			selected_down_btn.innerHTML = (settings.button_down_label ? settings.button_down_label : "\u2193");	// Unicode DOWNWARDS arrow
+
+			wrapper_buttons.appendChild(selected_up_btn);
+			wrapper_buttons.appendChild(selected_down_btn);
+			wrapper_below.appendChild(wrapper_left);
+			wrapper_below.appendChild(wrapper_buttons);
+			//select.wrapper.appendChild(wrapper_below);
+
+			// Add controlws wrapper after multi.js wrapper
+			select.parentNode.insertBefore(wrapper_below, wrapper.nextSibling);
+		}
 
     // Save current state
     for (var i = 0; i < select.options.length; i++) {
