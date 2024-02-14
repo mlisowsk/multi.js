@@ -76,23 +76,85 @@ var multi = (function() {
 
   // Toggles hilight state of an option
   var toggle_option_hilight = function(select, event, settings) {
-    var option = select.options[event.target.getAttribute("multi-index")];
+		var multi_index = event.target.getAttribute("multi-index");
+    var option = select.options[multi_index];
 		//console.log("toggle_option_hilight");
     if (option.disabled) {
       return;
     }
 
-		var hi = (option.getAttribute('data-multi-hilight') === "true");
-		//console.log("toggle-option-highlight: bef="+hi+ " "+typeof hi+" aft="+(!hi));
-		option.setAttribute('data-multi-hilight', ""+!hi);
-
-		//var $options = self.$right.find(':selected:not(span):not(.hidden)');
-    //option.selected = !option.selected;
-
-    //check_limit(select, settings);
-
-    trigger_event("change", select);
+		if (option.selected) {
+			select.setAttribute('data-multi-hilight', ""+multi_index);
+			var items = select.wrapper.selected.querySelectorAll(".item");
+			if (items) {
+				items.forEach((element) => {
+					element.classList.remove('hilight');
+				});
+			}
+			event.target.className += " hilight";
+		}
   };
+
+	// moves an option item up in selected panel
+	var move_up = function(select, event, settings) {
+		var items = select.wrapper.selected.querySelectorAll(".item");
+		//console.log("move_up: items "+items.length);
+		for (var i = 1; i < items.length; i++) {
+			var child = items[i];
+			//console.log("move_up: test child "+i);
+			if (child.classList.contains("hilight")) {
+				//console.log("move_up: moving child "+i);
+				items[i-1].before(child); // move one sibling up
+			}
+		}
+
+		// read back and remember sort order:
+		var selected_order = scan_selected_order(select, settings);
+		write_selected_order(select, settings, selected_order);
+	}
+
+	// moves an option item down in selected panel
+	var move_down = function(select, event, settings) {
+		var items = select.wrapper.selected.querySelectorAll(".item");
+		//console.log("move_down: items "+items.length);
+		for (var i = 0; i < items.length-1; i++) {
+			var child = items[i];
+			//console.log("move_down: test child "+i);
+			if (child.classList.contains("hilight")) {
+				//console.log("move_down: moving child "+i);
+				items[i+1].after(child); // move one sibling down
+			}
+		}
+
+		// read back and remember sort order:
+		var selected_order = scan_selected_order(select, settings);
+		write_selected_order(select, settings, selected_order);
+	}
+
+	// scan order of selected items from DOM and return as array of data-value attributes
+	var scan_selected_order = function(select, settings) {
+		var items = select.wrapper.selected.querySelectorAll(".item");
+		//console.log("read_selected_order: items "+items.length);
+		var order = [];
+		for (var i = 0; i < items.length; i++) {
+			order.push(items[i].getAttribute("data-value"));
+		}
+		return order;
+	}
+
+	// read sort array from SELECT element
+  var read_selected_order = function(select, settings) {
+		try {
+			return JSON.parse(select.getAttribute("data-selected-order"));
+		} catch(e) {
+			return [];
+		}
+	}
+
+	// write sort array to SELECT element
+	var write_selected_order = function(select, settings, selected_order) {
+		select.setAttribute("data-selected-order", JSON.stringify(selected_order));
+	}
 
   // Refreshes an already constructed multi.js instance
   var refresh_select = function(select, settings) {
@@ -123,16 +185,12 @@ var multi = (function() {
     // Current group
     var item_group = null;
     var current_optgroup = null;
-console.log("data-selected-order="+select.getAttribute("data-selected-order"));
-		var selected_order;
-		try {
-			var selected_order = JSON.parse(select.getAttribute("data-selected-order"));
-		} catch(e) {
-			var selected_order = [];
-		}
-	
+
+		var selected_order = read_selected_order(select, settings);
+		//console.log("data-selected-order="+selected_order);
 		var selected_elems = [];
-		
+		var hilight_index = select.getAttribute('data-multi-hilight');
+
     // Loop over select options and add to the non-selected and selected columns
     for (var i = 0; i < select.options.length; i++) {
       var option = select.options[i];
@@ -152,22 +210,15 @@ console.log("data-selected-order="+select.getAttribute("data-selected-order"));
         row.className += " disabled";
       }
 
-			var hi = (option.getAttribute('data-multi-hilight') === "true");
-			//console.log(hi);
       // Add row to selected column if option selected
       if (option.selected) {
         row.className += " selected";
         var clone = row.cloneNode(true);
-				if (hi)
+				if (hilight_index == i)
 					clone.className += " hilight";
 				selected_elems.push(clone);
-        //select.wrapper.selected.appendChild(clone);
       }
 
-			if (hi) {
-				row.className += " hilight";
-			}
-			
       // Create group if entering a new optgroup
       if (
         option.parentNode.nodeName == "OPTGROUP" &&
@@ -206,30 +257,29 @@ console.log("data-selected-order="+select.getAttribute("data-selected-order"));
         }
       }
     }
-		
+
 		// populate selected list:
 		var val, idx, elem;
-		console.log("selected_elems.length="+selected_elems.length+" " +JSON.stringify(selected_elems));
+		//console.log("selected_elems.length="+selected_elems.length);
 		// first, traverse order array and find matching selected HTMLOptionElements
 		for(var s=0; s<selected_order.length; s++) {
 			val = selected_order[s];
-			console.log("looking for val="+val+ " "+typeof val);
+			//console.log("looking for val="+val+ " "+typeof val);
 			idx = selected_elems.find_option_by_value(val);
 			if (idx >= 0) {
-				console.log("find_option_by_value found! for val="+val+" idx="+idx);
+				//console.log("find_option_by_value found! for val="+val+" idx="+idx);
 				select.wrapper.selected.appendChild(selected_elems[idx]);
 				selected_elems.splice(idx, 1);
 			}
 		}
 		// next, append remaining HTMLOptionElements
-		console.log("remaining selected_elems.length="+selected_elems.length+" " +JSON.stringify(selected_elems));
+		//console.log("remaining selected_elems.length="+selected_elems.length+" " +JSON.stringify(selected_elems));
 		for(var s=0; s<selected_elems.length; s++) {
 			select.wrapper.selected.appendChild(selected_elems[s]);
 			selected_order.push(selected_elems[s].getAttribute("data-value"));
 		}
-		console.log("final selected_order="+selected_order);
-		select.setAttribute("data-selected-order", JSON.stringify(selected_order));
-		
+		//console.log("final selected_order="+selected_order);
+		write_selected_order(select, settings, selected_order);
 
     // Hide empty optgroups
     if (settings.hide_empty_groups) {
@@ -246,10 +296,10 @@ console.log("data-selected-order="+select.getAttribute("data-selected-order"));
 	// Array of HTMLElements returns the array index of element with given data-value of v or null.
   Array.prototype.find_option_by_value = function( v ) {
 		return this.findIndex(function(el,i){
-			console.log("checking i="+i+" el.value="+el.getAttribute("data-value") +" vs "+v+" for "+JSON.stringify(el));
+			//console.log("checking i="+i+" el.value="+el.getAttribute("data-value") +" vs "+v+" for "+JSON.stringify(el));
 			return (el.getAttribute("data-value") == v);});
 	}
-	
+
   // Intializes and constructs an multi.js instance
 	// @param {HTMLSelectElement} select - DOM element of <SELECT>
   var init = function(select, settings) {
@@ -336,29 +386,6 @@ console.log("data-selected-order="+select.getAttribute("data-selected-order"));
     var selected = document.createElement("div");
     selected.className = "selected-wrapper";
 
-		var preventClick = false;
-		var dblclickTimer = null;
-    // Add dblclick handler to toggle the selected status
-    wrapper.addEventListener("dblclick", function(event) {
-      if (event.target.getAttribute("multi-index")) {
-				clearTimeout(dblclickTimer);
-				preventClick = true;
-        toggle_option(select, event, settings);
-      }
-    });
-
-    // Add click handler to toggle the hilight status
-    wrapper.addEventListener("click", function(event) {
-      if (event.target.getAttribute("multi-index")) {
-				dblclickTimer = setTimeout(() => {
-						if(!preventClick){
-							toggle_option_hilight(select, event, settings);
-						}
-						preventClick = false
-					}, 250);
-      }
-    });
-
     // Add keyboard handler to toggle the selected status
     wrapper.addEventListener("keypress", function(event) {
       var is_action_key = event.keyCode === 32 || event.keyCode === 13;
@@ -382,9 +409,26 @@ console.log("data-selected-order="+select.getAttribute("data-selected-order"));
     // Add multi.js wrapper after select element
     select.parentNode.insertBefore(wrapper, select.nextSibling);
 
+    // Add dblclick handler to toggle the selected status
+    wrapper.addEventListener("dblclick", function(event) {
+			//console.log("dblclick");
+      if (event.target.getAttribute("multi-index")) {
+        toggle_option(select, event, settings);
+      }
+    });
+
+    // Add click handler to toggle the hilight status
+    wrapper.addEventListener("click", function(event) {
+			//console.log("click");
+      if (event.target.getAttribute("multi-index")) {
+				if (wrapper.selected.contains(event.target))	// only highlight items in selected list
+					toggle_option_hilight(select, event, settings);
+      }
+			//else console.log("click selected - no multi-index");
+    });
+
 		// Add Up Down buttons
 		if (settings.selected_updown) {
-			console.log ("adding updown buttons");
 			var wrapper_below = document.createElement("div");	// wrapper below both lists, for layout
 			var wrapper_left = document.createElement("div");	// empty box below left list, for layout
 			var wrapper_buttons = document.createElement("div");	// wrapper for controls below right list
@@ -409,6 +453,17 @@ console.log("data-selected-order="+select.getAttribute("data-selected-order"));
 
 			// Add controlws wrapper after multi.js wrapper
 			select.parentNode.insertBefore(wrapper_below, wrapper.nextSibling);
+
+			// Add click handler to up button
+			selected_up_btn.addEventListener("click", function(event) {
+				//console.log("Up button");
+				move_up(select, event, settings);
+			});
+			// Add click handler to up button
+			selected_down_btn.addEventListener("click", function(event) {
+				//console.log("Down button");
+				move_down(select, event, settings);
+			});
 		}
 
     // Save current state
