@@ -87,9 +87,9 @@ var multi = (function() {
 			select.setAttribute('data-multi-hilight', ""+multi_index);
 			var items = select.wrapper.selected.querySelectorAll(".item");
 			if (items) {
-				items.forEach((element) => {
-					element.classList.remove('hilight');
-				});
+				for (var i = 0; i < items.length; i++) {
+					items[i].classList.remove('hilight');
+        }
 			}
 			event.target.className += " hilight";
 		}
