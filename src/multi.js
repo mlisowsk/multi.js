@@ -295,9 +295,12 @@ var multi = (function() {
 
   // Array of HTMLElements returns the array index of element with given data-value of v or null.
   Array.prototype.find_option_by_value = function( v ) {
-    return this.findIndex(function(el,i){
-      //console.log("checking i="+i+" el.value="+el.getAttribute("data-value") +" vs "+v+" for "+JSON.stringify(el));
-      return (el.getAttribute("data-value") == v);});
+    for (var i = 0; i < this.length; i++) {
+      //console.log("checking i="+i+" el.value="+this[i].getAttribute("data-value") +" vs "+v);
+      if (this[i].getAttribute("data-value") == v)
+        return i;
+    }
+    return -1;
   }
 
   // Intializes and constructs an multi.js instance
