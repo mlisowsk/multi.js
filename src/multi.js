@@ -85,7 +85,7 @@ var multi = (function() {
 
     if (option.selected) {
       select.setAttribute('data-multi-hilight', ""+multi_index);
-      var items = select.wrapper.selected.querySelectorAll(".item");
+      var items = select.wrapper.lists.selected.querySelectorAll(".item");
       if (items) {
         for (var i = 0; i < items.length; i++) {
           items[i].classList.remove('hilight');
@@ -97,14 +97,14 @@ var multi = (function() {
 
   // moves an option item up in selected panel
   var move_up = function(select, event, settings) {
-    var items = select.wrapper.selected.querySelectorAll(".item");
+    var items = select.wrapper.lists.selected.querySelectorAll(".item");
     //console.log("move_up: items "+items.length);
     for (var i = 1; i < items.length; i++) {
       var child = items[i];
       //console.log("move_up: test child "+i);
       if (child.classList.contains("hilight")) {
         //console.log("move_up: moving child "+i);
-        select.wrapper.selected.insertBefore(child, items[i-1]); // move one sibling up
+        select.wrapper.lists.selected.insertBefore(child, items[i-1]); // move one sibling up
       }
     }
 
@@ -115,14 +115,14 @@ var multi = (function() {
 
   // moves an option item down in selected panel
   var move_down = function(select, event, settings) {
-    var items = select.wrapper.selected.querySelectorAll(".item");
+    var items = select.wrapper.lists.selected.querySelectorAll(".item");
     //console.log("move_down: items "+items.length);
     for (var i = 0; i < items.length-1; i++) {
       var child = items[i];
       //console.log("move_down: test child "+i);
       if (child.classList.contains("hilight")) {
         //console.log("move_down: moving child "+i);
-				select.wrapper.selected.insertBefore(child, items[i+1].nextSibling); // move one sibling down
+				select.wrapper.lists.selected.insertBefore(child, items[i+1].nextSibling); // move one sibling down
       }
     }
 
@@ -133,7 +133,7 @@ var multi = (function() {
 
   // scan order of selected items from DOM and return as array of data-value attributes
   var scan_selected_order = function(select, settings) {
-    var items = select.wrapper.selected.querySelectorAll(".item");
+    var items = select.wrapper.lists.selected.querySelectorAll(".item");
     //console.log("read_selected_order: items "+items.length);
     var order = [];
     for (var i = 0; i < items.length; i++) {
@@ -159,8 +159,8 @@ var multi = (function() {
   // Refreshes an already constructed multi.js instance
   var refresh_select = function(select, settings) {
     // Clear columns
-    select.wrapper.selected.innerHTML = "";
-    select.wrapper.non_selected.innerHTML = "";
+    select.wrapper.lists.selected.innerHTML = "";
+    select.wrapper.lists.non_selected.innerHTML = "";
 
     // Add headers to columns
     if (settings.non_selected_header && settings.selected_header) {
@@ -173,8 +173,8 @@ var multi = (function() {
       non_selected_header.innerText = settings.non_selected_header;
       selected_header.innerText = settings.selected_header;
 
-      select.wrapper.non_selected.appendChild(non_selected_header);
-      select.wrapper.selected.appendChild(selected_header);
+      select.wrapper.lists.non_selected.appendChild(non_selected_header);
+      select.wrapper.lists.selected.appendChild(selected_header);
     }
 
     // Get search value
@@ -235,7 +235,7 @@ var multi = (function() {
           item_group.appendChild(groupLabel);
         }
 
-        select.wrapper.non_selected.appendChild(item_group);
+        select.wrapper.lists.non_selected.appendChild(item_group);
       }
 
       // Clear group if not inside optgroup
@@ -253,7 +253,7 @@ var multi = (function() {
         if (item_group != null) {
           item_group.appendChild(row);
         } else {
-          select.wrapper.non_selected.appendChild(row);
+          select.wrapper.lists.non_selected.appendChild(row);
         }
       }
     }
@@ -268,14 +268,14 @@ var multi = (function() {
       idx = selected_elems.find_option_by_value(val);
       if (idx >= 0) {
         //console.log("find_option_by_value found! for val="+val+" idx="+idx);
-        select.wrapper.selected.appendChild(selected_elems[idx]);
+        select.wrapper.lists.selected.appendChild(selected_elems[idx]);
         selected_elems.splice(idx, 1);
       }
     }
     // next, append remaining HTMLOptionElements
     //console.log("remaining selected_elems.length="+selected_elems.length+" " +JSON.stringify(selected_elems));
     for(var s=0; s<selected_elems.length; s++) {
-      select.wrapper.selected.appendChild(selected_elems[s]);
+      select.wrapper.lists.selected.appendChild(selected_elems[s]);
       selected_order.push(selected_elems[s].getAttribute("data-value"));
     }
     //console.log("final selected_order="+selected_order);
@@ -382,6 +382,10 @@ var multi = (function() {
       wrapper.search = search;
     }
 
+    // Start constructing lists
+    var lists = document.createElement("div");
+    lists.className = "multi-wraplists";
+		
     // Add columns for selected and non-selected
     var non_selected = document.createElement("div");
     non_selected.className = "non-selected-wrapper";
@@ -401,12 +405,14 @@ var multi = (function() {
       }
     });
 
-    wrapper.appendChild(non_selected);
-    wrapper.appendChild(selected);
+    lists.appendChild(non_selected);
+    lists.appendChild(selected);
 
-    wrapper.non_selected = non_selected;
-    wrapper.selected = selected;
+    lists.non_selected = non_selected;
+    lists.selected = selected;
 
+		wrapper.appendChild(lists);
+		wrapper.lists = lists;
     select.wrapper = wrapper;
 
     // Add multi.js wrapper after select element
@@ -424,7 +430,7 @@ var multi = (function() {
     wrapper.addEventListener("click", function(event) {
       //console.log("click");
       if (event.target.getAttribute("multi-index")) {
-        if (wrapper.selected.contains(event.target))  // only highlight items in selected list
+        if (wrapper.lists.selected.contains(event.target))  // only highlight items in selected list
           toggle_option_hilight(select, event, settings);
       }
       //else console.log("click selected - no multi-index");
@@ -454,7 +460,7 @@ var multi = (function() {
       wrapper_below.appendChild(wrapper_buttons);
       //select.wrapper.appendChild(wrapper_below);
 
-      // Add controlws wrapper after multi.js wrapper
+      // Add controls wrapper after multi.js wrapper
       select.parentNode.insertBefore(wrapper_below, wrapper.nextSibling);
 
       // Add click handler to up button

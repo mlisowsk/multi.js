@@ -1,18 +1,27 @@
 .multi-wrapper {
+		display: flex;
+		flex-direction: column;
     border: 1px solid #ccc;
     border-radius: 3px;
     width: 100%;
 }
 
+.multi-wraplists {
+		flex: 1 1 100px;
+		display: flex;
+		flex-direction: row;
+}
+
 .multi-wrapper .non-selected-wrapper,
 .multi-wrapper .selected-wrapper {
+		flex: 1 1 50px;
     box-sizing: border-box;
-    display: inline-block;
-    height: 200px;
+    /* display: inline-block; */
+    /* height: 200px; */
     overflow-y: scroll;
     padding: 10px;
     vertical-align: top;
-    width: 50%;
+    /* width: 50%; */
 }
 
 .multi-wrapper .non-selected-wrapper {
@@ -57,6 +66,7 @@
 }
 
 .multi-wrapper .search-input {
+		flex: 0 0 50px;
     border: 0;
     border-bottom: 1px solid #ccc;
     border-radius: 0;
