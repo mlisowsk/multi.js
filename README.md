@@ -90,6 +90,22 @@ multi(select_element, {
 });
 ```
 
+### Re-ordering selected items
+
+Starting with v0.6 there is an option to allow users re-ordering the selected items in the right list.
+When enabled, Up and Down buttons will appear below the right list. Users can select a single item and then use Up or Down to move it up or down.
+
+```javascript
+multi(select_element, {
+	"selected_updown": true,			// enables re-ordering and shows buttons
+	"button_up_label": "Up",			// optional text for Up button, defaults to Unicode UPWARDS ARROW
+	"button_down_label": "Down",	// optional text for Down button, defaults to Unicode DOWNWARDS ARROW
+	"selected_order": ["2","1","3"]			// optional inital order
+});
+```
+
+The `selected_order` can be used to specify an initial order of selected items that deviates from the order of the `<OPTION>` tags as they appear in HTML. `selected_order` is an array of values, that correspond to the `value` attribute of the HTML `<OPTION>` tags.
+
 ### jQuery
 
 multi.js is fully native Javascript but also has jQuery support. If you have jQuery included multi can be applied to a select element as follows:
