@@ -97,10 +97,10 @@ When enabled, Up and Down buttons will appear below the right list. Users can se
 
 ```javascript
 multi(select_element, {
-	"selected_updown": true,			// enables re-ordering and shows buttons
-	"button_up_label": "Up",			// optional text for Up button, defaults to Unicode UPWARDS ARROW
-	"button_down_label": "Down",	// optional text for Down button, defaults to Unicode DOWNWARDS ARROW
-	"selected_order": ["2","1","3"]			// optional inital order
+    "selected_updown": true,        // enables re-ordering and shows buttons
+    "button_up_label": "Up",        // optional text for Up button, defaults to Unicode UPWARDS ARROW
+    "button_down_label": "Down",    // optional text for Down button, defaults to Unicode DOWNWARDS ARROW
+    "selected_order": ["2","1","3"] // optional inital order
 });
 ```
 
