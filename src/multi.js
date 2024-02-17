@@ -104,7 +104,7 @@ var multi = (function() {
       //console.log("move_up: test child "+i);
       if (child.classList.contains("hilight")) {
         //console.log("move_up: moving child "+i);
-        items[i-1].before(child); // move one sibling up
+        select.wrapper.selected.insertBefore(child, items[i-1]); // move one sibling up
       }
     }
 
@@ -122,7 +122,7 @@ var multi = (function() {
       //console.log("move_down: test child "+i);
       if (child.classList.contains("hilight")) {
         //console.log("move_down: moving child "+i);
-        items[i+1].after(child); // move one sibling down
+				select.wrapper.selected.insertBefore(child, items[i+1].nextSibling); // move one sibling down
       }
     }
 
