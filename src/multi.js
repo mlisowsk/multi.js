@@ -500,17 +500,46 @@ var multi = (function() {
   return init;
 })();
 
+/**
+ * read sort array from SELECT element
+ * @param {HTMLSelectElement} select - DOM element of <SELECT>
+ * @returns {string[]]} array of value attributes of the OPTION elements
+ */
+var multi_get_selected_order = function(select) {
+  if (!select) return undefined;
+
+  try {
+    var order = select.getAttribute("data-selected-order");
+    if (order)
+      return JSON.parse(order);
+    else
+      return undefined;
+  } catch(e) {
+    return [];
+  }
+}
+
 // Add jQuery wrapper if jQuery is present
 if (typeof jQuery !== "undefined") {
   (function($) {
-    $.fn.multi = function(settings) {
-      settings = typeof settings !== "undefined" ? settings : {};
+    $.fn.multi = function(arg) {
+      if (typeof arg === "string") {
+        if (arg === "multi_get_selected_order") {
+          var $select = $(this);
+          if ($select.length > 1)
+            throw "Method call only supported on a single jQuery object.";
 
-      return this.each(function() {
-        var $select = $(this);
+          return multi_get_selected_order($select.get(0));
+        }
+      } else {
+        settings = typeof arg !== "undefined" ? arg : {};
 
-        multi($select.get(0), settings);
-      });
+        return this.each(function() {
+          var $select = $(this);
+
+          multi($select.get(0), settings);
+        });
+      }
     };
   })(jQuery);
 }
