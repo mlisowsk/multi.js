@@ -106,6 +106,20 @@ multi(select_element, {
 
 The `selected_order` can be used to specify an initial order of selected items that deviates from the order of the `<OPTION>` tags as they appear in HTML. `selected_order` is an array of values, that correspond to the `value` attribute of the HTML `<OPTION>` tags.
 
+#### Reading back the order of selected items
+
+To read-back the order of the selected items (in the right list) you can use either API:
+
+```javascript
+var array_of_values = multi_get_selected_order(select_element);
+```
+
+or when using jQuery:
+
+```javascript
+var array_of_values = $('#your_select_element').multi("multi_get_selected_order");
+```
+
 ### jQuery
 
 multi.js is fully native Javascript but also has jQuery support. If you have jQuery included multi can be applied to a select element as follows:
