@@ -67,7 +67,7 @@
 }
 
 .multi-wrapper .search-input {
-    flex: 0 0 50px;
+    flex: 0 0 content;
     border: 0;
     border: 1px solid #ccc;
     border-bottom: none;
