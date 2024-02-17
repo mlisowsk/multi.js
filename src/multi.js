@@ -72,6 +72,10 @@ var multi = (function() {
     check_limit(select, settings);
 
     trigger_event("change", select);
+
+    // read back and remember sort order:
+    var selected_order = scan_selected_order(select, settings);
+    write_selected_order(select, settings, selected_order);
   };
 
   // Toggles hilight state of an option
@@ -122,7 +126,7 @@ var multi = (function() {
       //console.log("move_down: test child "+i);
       if (child.classList.contains("hilight")) {
         //console.log("move_down: moving child "+i);
-				select.wrapper.lists.selected.insertBefore(child, items[i+1].nextSibling); // move one sibling down
+        select.wrapper.lists.selected.insertBefore(child, items[i+1].nextSibling); // move one sibling down
       }
     }
 
@@ -385,7 +389,7 @@ var multi = (function() {
     // Start constructing lists
     var lists = document.createElement("div");
     lists.className = "multi-wraplists";
-		
+
     // Add columns for selected and non-selected
     var non_selected = document.createElement("div");
     non_selected.className = "non-selected-wrapper";
@@ -411,8 +415,8 @@ var multi = (function() {
     lists.non_selected = non_selected;
     lists.selected = selected;
 
-		wrapper.appendChild(lists);
-		wrapper.lists = lists;
+    wrapper.appendChild(lists);
+    wrapper.lists = lists;
     select.wrapper = wrapper;
 
     // Add multi.js wrapper after select element
@@ -460,8 +464,8 @@ var multi = (function() {
       wrapper_below.appendChild(wrapper_buttons);
       //select.wrapper.appendChild(wrapper_below);
 
-      // Add controls wrapper after multi.js wrapper
-      select.parentNode.insertBefore(wrapper_below, wrapper.nextSibling);
+      // Add controls wrapper after lists wrapper
+      wrapper.appendChild(wrapper_below);
 
       // Add click handler to up button
       selected_up_btn.addEventListener("click", function(event) {
