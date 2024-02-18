@@ -85,19 +85,21 @@
   /* border: 1px solid red; */
   display: flex;
   flex-direction: row;
-  margin: 5px;
+  margin: 5px 0px;
 }
 
 .wrapper-low .controls {
   /* border: 1px solid blue; */
   display: flex;
   flex-direction: row;
+  column-gap: 5px;
+  padding: 0px 5px;
   justify-content: space-evenly;
   width: 50%;
 }
 
 .wrapper-low .controls button {
-  flex: 0 1 auto;
+  flex: 1 1 30%;
 }
 
 .multi-wrapper .non-selected-wrapper .item.selected {
