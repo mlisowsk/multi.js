@@ -22,6 +22,7 @@
     overflow-y: scroll;
     padding: 10px;
     vertical-align: top;
+    margin: 0;
     /* width: 50%; */
 }
 

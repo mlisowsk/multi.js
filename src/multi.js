@@ -202,11 +202,11 @@ var multi = (function() {
       var value = option.value;
       var label = option.textContent || option.innerText;
 
-      var row = document.createElement("a");
+      var row = document.createElement("li");
       row.tabIndex = 0;
       row.className = "item";
       row.innerText = label;
-      row.setAttribute("role", "button");
+      row.setAttribute("role", "option");
       row.setAttribute("data-value", value);
       row.setAttribute("multi-index", i);
 
@@ -391,11 +391,13 @@ var multi = (function() {
     lists.className = "multi-wraplists";
 
     // Add columns for selected and non-selected
-    var non_selected = document.createElement("div");
+    var non_selected = document.createElement("ol");
     non_selected.className = "non-selected-wrapper";
+    non_selected.setAttribute("role", "listbox");
 
-    var selected = document.createElement("div");
+    var selected = document.createElement("ol");
     selected.className = "selected-wrapper";
+    selected.setAttribute("role", "listbox");
 
     // Add keyboard handler to toggle the selected status
     wrapper.addEventListener("keypress", function(event) {
