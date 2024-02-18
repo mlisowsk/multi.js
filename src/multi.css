@@ -8,8 +8,8 @@
     flex: 1 1 100px;
     display: flex;
     flex-direction: row;
-    border-radius: 0 0 3px 3px;
-    border: 1px solid #ccc;
+    /* border-radius: 0 0 3px 3px; */
+    /* border: 1px solid #ccc; */
 }
 
 .multi-wrapper .non-selected-wrapper,
@@ -24,6 +24,8 @@
     vertical-align: top;
     margin: 0;
     /* width: 50%; */
+    border-radius: 0 0 3px 3px;
+    border: 1px solid #ccc;
 }
 
 .multi-wrapper .non-selected-wrapper {
@@ -33,6 +35,20 @@
 
 .multi-wrapper .selected-wrapper {
     background: #fff;
+}
+
+.multi-wrapper .wrapper-center {
+  flex: 0 1 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  margin: 5px;
+  column-gap: 5px;
+  justify-content: space-evenly;
+}
+
+.multi-wrapper .wrapper-center button {
+  flex: 0 0 30px;
 }
 
 .multi-wrapper .header {

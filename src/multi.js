@@ -60,8 +60,8 @@ var multi = (function() {
   };
 
   // Toggles the target option on the select
-  var toggle_option = function(select, event, settings) {
-    var option = select.options[event.target.getAttribute("multi-index")];
+  var toggle_option = function(select, multi_index, settings) {
+    var option = select.options[multi_index];
 
     if (option.disabled) {
       return;
@@ -78,6 +78,16 @@ var multi = (function() {
     write_selected_order(select, settings, selected_order);
   };
 
+	// Removes visual hilighting from all items of a given list
+  function unhilight_list(select, list) {
+    var items = list.querySelectorAll(".item");
+    if (items) {
+      for (var i = 0; i < items.length; i++) {
+        items[i].classList.remove('hilight');
+      }
+    }
+  }
+
   // Toggles hilight state of an option
   var toggle_option_hilight = function(select, event, settings) {
     var multi_index = event.target.getAttribute("multi-index");
@@ -87,16 +97,11 @@ var multi = (function() {
       return;
     }
 
-    if (option.selected) {
-      select.setAttribute('data-multi-hilight', ""+multi_index);
-      var items = select.wrapper.lists.selected.querySelectorAll(".item");
-      if (items) {
-        for (var i = 0; i < items.length; i++) {
-          items[i].classList.remove('hilight');
-        }
-      }
-      event.target.className += " hilight";
-    }
+    select.setAttribute('data-multi-hilight', ""+multi_index);
+    unhilight_list(select, select.wrapper.lists.selected);
+    unhilight_list(select, select.wrapper.lists.non_selected);
+    //console.log("toggle_option_hilight multi_index="+multi_index);
+    event.target.className += " hilight";
   };
 
   // moves an option item up in selected panel
@@ -350,6 +355,10 @@ var multi = (function() {
       Array.isArray(settings["selected_order"])
         ? settings["selected_order"]
         : [];
+    settings["show_move_buttons"] =
+      typeof settings["show_move_buttons"] !== "undefined"
+        ? settings["show_move_buttons"]
+        : false;
 
     // Check if already initalized
     if (select.dataset.multijs != null) {
@@ -407,11 +416,44 @@ var multi = (function() {
       if (is_option && is_action_key) {
         // Prevent the default action to stop scrolling when space is pressed
         event.preventDefault();
-        toggle_option(select, event, settings);
+        toggle_option(select, is_option, settings);
       }
     });
 
     lists.appendChild(non_selected);
+
+    // Add Move Right/Left buttons
+    if (settings.show_move_buttons) {
+      var wrapper_center = document.createElement("div");  // wrapper for move buttons, for layout
+      var move_right_btn = document.createElement("button");
+      var move_left_btn = document.createElement("button");
+
+      wrapper_center.className = "wrapper-center";
+      move_right_btn.className = "btn btn-right";
+      move_left_btn.className = "btn btn-left";
+      move_right_btn.setAttribute("type", "button");
+      move_left_btn.setAttribute("type", "button");
+      move_right_btn.innerHTML = (settings.button_up_label ? settings.button_up_label : "\u2192"); // Unicode RIGHTWARDS arrow
+      move_left_btn.innerHTML = (settings.button_down_label ? settings.button_down_label : "\u2190"); // Unicode LEFTWARDS arrow
+
+      wrapper_center.appendChild(move_right_btn);
+      wrapper_center.appendChild(move_left_btn);
+
+      lists.appendChild(wrapper_center);
+
+      // Add click handler to Left button
+      move_left_btn.addEventListener("click", function(event) {
+        var multi_index = parseInt(select.getAttribute('data-multi-hilight'));
+        //console.log("Left button multi_index="+multi_index);
+        if (multi_index >= 0) {
+          var option = select.options[multi_index];
+          if (!option.disabled && option.selected) {
+            toggle_option(select, multi_index, settings);
+          }
+        }
+      });
+    }
+
     lists.appendChild(selected);
 
     lists.non_selected = non_selected;
@@ -428,7 +470,7 @@ var multi = (function() {
     wrapper.addEventListener("dblclick", function(event) {
       //console.log("dblclick");
       if (event.target.getAttribute("multi-index")) {
-        toggle_option(select, event, settings);
+        toggle_option(select, event.target.getAttribute("multi-index"), settings);
       }
     });
 
@@ -436,8 +478,10 @@ var multi = (function() {
     wrapper.addEventListener("click", function(event) {
       //console.log("click");
       if (event.target.getAttribute("multi-index")) {
-        if (wrapper.lists.selected.contains(event.target))  // only highlight items in selected list
+        if (wrapper.lists.selected.contains(event.target)
+          || wrapper.lists.non_selected.contains(event.target)) {
           toggle_option_hilight(select, event, settings);
+        }
       }
       //else console.log("click selected - no multi-index");
     });
@@ -463,6 +507,12 @@ var multi = (function() {
       wrapper_buttons.appendChild(selected_up_btn);
       wrapper_buttons.appendChild(selected_down_btn);
       wrapper_below.appendChild(wrapper_left);
+      // Add a padding center DIV if we also show Move buttons
+      if (settings.show_move_buttons) {
+        var wrapper_center2 = document.createElement("div");  // wrapper for move buttons, for layout
+        wrapper_center2.className = "wrapper-center";
+        wrapper_below.appendChild(wrapper_center2);
+      }
       wrapper_below.appendChild(wrapper_buttons);
       //select.wrapper.appendChild(wrapper_below);
 
