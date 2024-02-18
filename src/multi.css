@@ -8,22 +8,18 @@
     flex: 1 1 100px;
     display: flex;
     flex-direction: row;
-    /* border-radius: 0 0 3px 3px; */
-    /* border: 1px solid #ccc; */
 }
 
 .multi-wrapper .non-selected-wrapper,
 .multi-wrapper .selected-wrapper {
     flex: 1 1 50px;
     box-sizing: border-box;
-    /* display: inline-block; */
     height: 50px;
     min-height: 100%;
     overflow-y: scroll;
     padding: 10px;
     vertical-align: top;
     margin: 0;
-    /* width: 50%; */
     border-radius: 0 0 3px 3px;
     border: 1px solid #ccc;
 }
@@ -44,7 +40,7 @@
   flex-direction: column;
   padding: 5px;
   column-gap: 5px;
-  justify-content: space-evenly;
+  justify-content: center;
 }
 
 .multi-wrapper .multi-wraplists .wrapper-center {
@@ -53,6 +49,8 @@
 
 .multi-wrapper .wrapper-center button {
   flex: 0 0 30px;
+  width: 40px;
+  margin: 5px 0px;
 }
 
 .multi-wrapper .header {
@@ -89,7 +87,6 @@
 
 .multi-wrapper .search-input {
     flex: 0 0 content;
-    border: 0;
     border: 1px solid #ccc;
     border-bottom: none;
     border-radius: 3px 3px 0 0;
@@ -104,6 +101,7 @@
 
 .wrapper-low {
   /* border: 1px solid red; */
+  flex: 0 1 25px;
   display: flex;
   flex-direction: row;
   margin: 5px 0px;
