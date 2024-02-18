@@ -42,9 +42,13 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  margin: 5px;
+  padding: 5px;
   column-gap: 5px;
   justify-content: space-evenly;
+}
+
+.multi-wrapper .multi-wraplists .wrapper-center {
+  border-top: 1px solid #ccc;
 }
 
 .multi-wrapper .wrapper-center button {

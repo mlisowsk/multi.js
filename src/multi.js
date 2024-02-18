@@ -78,7 +78,7 @@ var multi = (function() {
     write_selected_order(select, settings, selected_order);
   };
 
-	// Removes visual hilighting from all items of a given list
+  // Removes visual hilighting from all items of a given list
   function unhilight_list(select, list) {
     var items = list.querySelectorAll(".item");
     if (items) {
@@ -226,6 +226,9 @@ var multi = (function() {
         if (hilight_index == i)
           clone.className += " hilight";
         selected_elems.push(clone);
+      } else {
+        if (hilight_index == i)
+          row.className += " hilight";
       }
 
       // Create group if entering a new optgroup
@@ -448,6 +451,18 @@ var multi = (function() {
         if (multi_index >= 0) {
           var option = select.options[multi_index];
           if (!option.disabled && option.selected) {
+            toggle_option(select, multi_index, settings);
+          }
+        }
+      });
+
+      // Add click handler to Right button
+      move_right_btn.addEventListener("click", function(event) {
+        var multi_index = parseInt(select.getAttribute('data-multi-hilight'));
+        //console.log("Right button multi_index="+multi_index);
+        if (multi_index >= 0) {
+          var option = select.options[multi_index];
+          if (!option.disabled && !option.selected) {
             toggle_option(select, multi_index, settings);
           }
         }

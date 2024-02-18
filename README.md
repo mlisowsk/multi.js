@@ -120,6 +120,17 @@ or when using jQuery:
 var array_of_values = $('#your_select_element').multi("multi_get_selected_order");
 ```
 
+### Optional move buttons
+
+Starting with v0.6.2 there is an option to show buttons for moving a highlighted option from left to right or vice versa.
+
+```javascript
+multi(select_element, {
+    "show_move_buttons": true      // shows buttons for moving an item to left or right list
+});
+```
+
+
 ### jQuery
 
 multi.js is fully native Javascript but also has jQuery support. If you have jQuery included multi can be applied to a select element as follows:
